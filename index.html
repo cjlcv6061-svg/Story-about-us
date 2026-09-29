@@ -2004,7 +2004,8 @@ async function play(startIdx){
   speaking=true;jumpTo=null;
   setPlayLabel('⏸','朗讀中');
   linesEl.classList.add('playing');
-  const lines=SCENES[current].lines;
+  const sc=SCENES[current];
+  const lines=sc.lines;
   // 循環模式且未指定起點：從循環範圍第一句開始
   let i;
   if(typeof startIdx==='number') i=startIdx;

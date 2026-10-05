@@ -698,6 +698,25 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .ap .ap-n{display:block;font-family:"Noto Sans Mono",monospace;font-size:9.5px;letter-spacing:.06em;
     color:rgba(238,240,246,.45);margin-top:1px;}
+  /* ====== 日光模式（body 無 .dark）：進場頁與幾處夜景寫死色的覆寫 ====== */
+  body:not(.dark) .role-overlay{background:#efe4cf;}
+  body:not(.dark) .land-tint{background:linear-gradient(180deg,rgba(250,243,228,.88) 0%,rgba(240,226,200,.80) 45%,rgba(222,200,160,.92) 100%);}
+  body:not(.dark) .land-glow{background:radial-gradient(130% 70% at 50% -8%,rgba(255,226,150,.55),transparent 62%);}
+  body:not(.dark) .land-moon{background:radial-gradient(circle at 38% 35%,#fff6d6,#f1c75e);box-shadow:0 0 34px 10px rgba(240,190,80,.45);}
+  body:not(.dark) .land-star{display:none;}
+  body:not(.dark) .land-meta{color:rgba(70,48,28,.62);}
+  body:not(.dark) .land-title{color:#2e2217;text-shadow:0 1px 10px rgba(255,255,255,.6);}
+  body:not(.dark) .land-sub .zh{color:#9a6a1f;}
+  body:not(.dark) .land-prompt .p1{color:#3a2a1c;}
+  body:not(.dark) .land-prompt .p2{color:rgba(70,48,28,.62);}
+  body:not(.dark) .ap{background:linear-gradient(140deg,rgba(255,255,255,.72),rgba(255,255,255,.42));
+    border-color:rgba(90,62,34,.20);box-shadow:0 2px 8px rgba(90,62,34,.10);}
+  body:not(.dark) .ap:hover{border-color:rgba(90,62,34,.42);}
+  body:not(.dark) .ap .ap-name{color:#2e2217;}
+  body:not(.dark) .ap .ap-n{color:rgba(70,48,28,.58);}
+  body:not(.dark) .role-card-note{color:rgba(70,48,28,.55);}
+  body:not(.dark) .rcp-track{background:rgba(90,62,34,.14);}
+  body:not(.dark) .cue-hint{color:rgba(70,48,28,.62);}
   /* 角色對照表 */
   .cc-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:2px 0 14px;}
   .cc-scene{border:1px solid var(--line);border-radius:9px;padding:11px 13px;margin-bottom:9px;
@@ -797,6 +816,7 @@
 </style>
 </head>
 <body>
+<script>try{if(localStorage.getItem('ps_dark')!=='0')document.body.classList.add('dark');}catch(e){document.body.classList.add('dark');}</script>
 <!-- 進場選角 -->
 <div class="role-overlay" id="roleOverlay" style="display:none;">
   <div class="land-bg" id="landBg"></div>
@@ -885,6 +905,7 @@
     <button class="ghost-btn" id="quizToggle" aria-pressed="false">測驗模式</button>
     <button class="ghost-btn" id="mapBtn">角色對照</button>
     <span class="spacer" style="flex:1"></span>
+    <button class="ghost-btn icon-btn" id="darkBtn" title="切換日光／夜間模式">☀</button>
     <button class="ghost-btn icon-btn" id="fontBtn" title="字級">A＋</button>
   </div>
   <!-- 測驗模式專屬選項：平時隱藏，開測驗模式才出現 -->
@@ -916,7 +937,7 @@
       <p><b>測驗模式</b><br>輸入你記得的台詞，按「對答案」看準確度與逐字對照。<b>同音字算對</b>（例如「黎/嚟」），助語詞嚴格逐字。長獨白會自動分節，一節一節練、各自記分。</p>
       <p><b>只練未掌握</b><br>只顯示你還沒達標（90%）的句子，集中補洞。</p>
       <p><b>我的成績</b><br>看整體掌握度、各場進度色帶（每格一句，長獨白每節一格）。可分享或匯出備份。</p>
-      <p><b>顯示</b><br>右上 A＋ 放大字級、🌙 切換深色，都會記住。「讀出角色名」可選朗讀時是否先讀說話者名字。</p>
+      <p><b>顯示</b><br>右上 A＋ 放大字級、☀／🌙 切換日光／夜間模式，都會記住。「讀出角色名」可選朗讀時是否先讀說話者名字。</p>
       <p class="help-note">提醒：成績只存在這部裝置的這個瀏覽器。換裝置、換瀏覽器、清除網站資料或無痕模式都會看不到舊進度。重要進度可用「匯出成績（Markdown）」存一份報告。</p>
     </div>
   </div>
@@ -2316,9 +2337,17 @@ function applyFs(){ document.documentElement.style.setProperty('--fs', FS_STEPS[
 document.getElementById('fontBtn').onclick=()=>{ fsIdx=(fsIdx+1)%FS_STEPS.length; applyFs(); };
 applyFs();
 
-// 深色（持久化）
-// 只有深色模式：永遠套用 body.dark（所有夜景色票掛在此 class 上）
-document.body.classList.add('dark');
+// 日光／夜間模式（持久化；預設夜間。夜景色票掛在 body.dark，日光＝:root 的啡米色紙底）
+let darkOn=(()=>{ try{ return localStorage.getItem(DARK_KEY)!=='0'; }catch(e){ return true; } })();
+function applyDark(){
+  document.body.classList.toggle('dark', darkOn);
+  const b=document.getElementById('darkBtn');
+  b.textContent = darkOn ? '☀' : '🌙';
+  b.title = darkOn ? '切換日光模式' : '切換夜間模式';
+  try{ localStorage.setItem(DARK_KEY, darkOn?'1':'0'); }catch(e){}
+}
+document.getElementById('darkBtn').onclick=()=>{ darkOn=!darkOn; applyDark(); };
+applyDark();
 
 /* ============================================================
    初始化
